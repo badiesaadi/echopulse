@@ -26,19 +26,23 @@ const GestureEngine = (() => {
 
   function init() {
     const overlay = document.getElementById('gesture-overlay');
-    overlay.style.pointerEvents = 'all';
+    if (overlay) {
+      overlay.style.pointerEvents = 'none';
+      overlay.style.display = 'none';
+    }
 
     // ── Touch events on content area ──
     const content = document.getElementById('content-area');
+    if (content) {
+      content.addEventListener('touchstart', onTouchStart, { passive: true });
+      content.addEventListener('touchmove',  onTouchMove,  { passive: true });
+      content.addEventListener('touchend',   onTouchEnd,   { passive: true });
 
-    content.addEventListener('touchstart', onTouchStart, { passive: false });
-    content.addEventListener('touchmove',  onTouchMove,  { passive: false });
-    content.addEventListener('touchend',   onTouchEnd,   { passive: false });
-
-    // Mouse fallback for desktop preview
-    content.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup',   onMouseUp);
+      // Mouse fallback for desktop preview
+      content.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup',   onMouseUp);
+    }
 
     // SOS slide
     initSOSSlide();
@@ -106,6 +110,11 @@ const GestureEngine = (() => {
 
   // ── Touch handlers ──
   function onTouchStart(e) {
+    // If touch target is an interactive element, do NOT intercept
+    if (e.target && e.target.closest('button, input, select, label, a, .icon-btn, .env-btn, .settings-gear-btn, .toggle-switch, .toggle-slider, .settings-seg-btn, .det-chip, .saved-route, .contact-item, .nav-item, [role="button"], [role="tab"]')) {
+      return;
+    }
+
     AudioEngine.resume();
     const touches = e.touches;
 
@@ -120,7 +129,6 @@ const GestureEngine = (() => {
 
   function onTouchMove(e) {
     if (e.touches.length === 2 && twoFingerStartY !== null) {
-      e.preventDefault();
       const currentY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       const delta = twoFingerStartY - currentY;
 
@@ -144,6 +152,9 @@ const GestureEngine = (() => {
   let mouseClickCount  = 0;
 
   function onMouseDown(e) {
+    if (e.target && e.target.closest('button, input, select, label, a, .icon-btn, .env-btn, .settings-gear-btn, .toggle-switch, .toggle-slider, .settings-seg-btn, .det-chip, .saved-route, .contact-item, .nav-item, [role="button"], [role="tab"]')) {
+      return;
+    }
     AudioEngine.resume();
     EP.createRipple(e.clientX - getAppOffset().x, e.clientY - getAppOffset().y);
     mouseClickCount++;

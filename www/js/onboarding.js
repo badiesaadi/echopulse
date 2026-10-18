@@ -119,6 +119,7 @@ const OnboardingFlow = (() => {
       dot.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
       dot.setAttribute('aria-label', `Step ${i + 1}`);
       dot.addEventListener('click', () => goTo(i));
+      dot.addEventListener('touchend', (e) => { e.preventDefault(); goTo(i); }, { passive: false });
       dots.push(dot);
       dotsRow.appendChild(dot);
     });
@@ -131,6 +132,7 @@ const OnboardingFlow = (() => {
     skipBtn.textContent = 'Skip';
     skipBtn.setAttribute('aria-label', 'Skip onboarding walkthrough');
     skipBtn.addEventListener('click', complete);
+    skipBtn.addEventListener('touchend', (e) => { e.preventDefault(); complete(); }, { passive: false });
 
     const nextBtn = document.createElement('button');
     nextBtn.className = 'onboarding-btn-primary';
@@ -138,6 +140,7 @@ const OnboardingFlow = (() => {
     nextBtn.textContent = 'Next';
     nextBtn.setAttribute('aria-label', 'Next step');
     nextBtn.addEventListener('click', next);
+    nextBtn.addEventListener('touchend', (e) => { e.preventDefault(); next(); }, { passive: false });
 
     btnRow.appendChild(skipBtn);
     btnRow.appendChild(nextBtn);

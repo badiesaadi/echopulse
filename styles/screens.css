@@ -151,7 +151,8 @@
   height: 52px;
   flex-shrink: 0;
   position: relative;
-  z-index: 10;
+  z-index: 50;
+  pointer-events: auto;
 }
 
 .radar-header__title {
@@ -169,7 +170,7 @@
   flex: 1;
   overflow: hidden;
   background: #050505;
-  min-height: 300px;
+  min-height: 180px;
 }
 
 #camera-canvas {
@@ -350,17 +351,17 @@
 /* ── Acoustic Screen ── */
 .screen--acoustic {
   background: var(--clr-bg);
-  padding-bottom: var(--sp-xl);
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 32px);
 }
 
 /* ── PathFinder Screen ── */
 .screen--pathfinder {
   background: var(--clr-bg);
-  padding-bottom: var(--sp-xl);
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 32px);
 }
 
 /* ── Emergency Screen ── */
 .screen--emergency {
   background: var(--clr-bg);
-  padding-bottom: var(--sp-xl);
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 32px);
 }

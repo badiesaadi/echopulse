@@ -48,8 +48,15 @@
     // Force reflow then show shell
     appShell.offsetHeight;
     requestAnimationFrame(() => {
-      splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+      splash.addEventListener('transitionend', () => {
+        if (splash && splash.parentNode) splash.remove();
+      }, { once: true });
     });
+
+    // Guaranteed fallback: remove splash completely from DOM after 500ms
+    setTimeout(() => {
+      if (splash && splash.parentNode) splash.remove();
+    }, 500);
 
     // Init all modules
     RadarRenderer.init();

@@ -19,7 +19,19 @@ const NavController = (() => {
     Object.keys(SCREENS).forEach(key => {
       const navBtn = document.getElementById(SCREENS[key].nav);
       if (navBtn) {
-        navBtn.addEventListener('click', () => navigate(key));
+        let touchTriggered = false;
+
+        navBtn.addEventListener('touchend', (e) => {
+          touchTriggered = true;
+          navigate(key);
+          setTimeout(() => { touchTriggered = false; }, 300);
+        }, { passive: true });
+
+        navBtn.addEventListener('click', (e) => {
+          if (!touchTriggered) {
+            navigate(key);
+          }
+        });
       }
     });
   }
