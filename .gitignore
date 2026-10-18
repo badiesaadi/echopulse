@@ -29,3 +29,15 @@ desktop.ini
 dist/
 build/
 .cache/
+
+# Android build outputs and caches
+.gradle/
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+

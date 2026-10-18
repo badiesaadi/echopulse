@@ -1,0 +1,38 @@
+{
+  "name": "EchoPulse — Spatial Acoustics Navigator",
+  "short_name": "EchoPulse",
+  "description": "AI-driven spatial acoustics and real-time environmental navigation app prototype using spatial audio and tactile haptics.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "en",
+  "categories": ["navigation", "accessibility", "health", "utilities"],
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Spatial Radar",
+      "url": "./index.html#radar",
+      "description": "Real-time object proximity & 3D sound map"
+    },
+    {
+      "name": "Acoustic Analyzer",
+      "url": "./index.html#acoustic",
+      "description": "Live decibel meter & sensory overload monitor"
+    },
+    {
+      "name": "Emergency SOS",
+      "url": "./index.html#emergency",
+      "description": "Instant emergency tactile broadcast"
+    }
+  ]
+}

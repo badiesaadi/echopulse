@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+  <title>EchoPulse — Spatial Acoustics Navigator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/screens.css" />
+  <link rel="stylesheet" href="styles/animations.css" />
+  <link rel="stylesheet" href="styles/onboarding.css" />
+  <link rel="stylesheet" href="styles/settings.css" />
+</head>
+<body class="app-root" role="application" aria-label="EchoPulse Spatial Acoustics Navigator">
+
+  <!-- ═══════════════════════════════════════════
+       SPLASH / BOOT SCREEN
+  ═══════════════════════════════════════════ -->
+  <div id="screen-splash" class="screen screen--active" role="main" aria-label="App loading screen">
+    <div class="splash__bg">
+      <canvas id="splash-canvas" aria-hidden="true"></canvas>
+    </div>
+    <div class="splash__content">
+      <div class="splash__logo" aria-label="EchoPulse logo">
+        <div class="logo-pulse-ring ring-1" aria-hidden="true"></div>
+        <div class="logo-pulse-ring ring-2" aria-hidden="true"></div>
+        <div class="logo-pulse-ring ring-3" aria-hidden="true"></div>
+        <div class="logo-core" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M12 32C12 32 18 20 32 20C46 20 52 32 52 32C52 32 46 44 32 44C18 44 12 32 12 32Z" stroke="#a3e635" stroke-width="2" fill="none"/>
+            <circle cx="32" cy="32" r="5" fill="#a3e635"/>
+            <path d="M32 22V18M32 46V42M22 32H18M46 32H42" stroke="#a3e635" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M26 26L23 23M41 23L38 26M38 38L41 41M23 41L26 38" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+          </svg>
+        </div>
+      </div>
+      <h1 class="splash__title">
+        <span class="splash__title-echo">Echo</span><span class="splash__title-pulse">Pulse</span>
+      </h1>
+      <p class="splash__tagline">Spatial Acoustics Navigator</p>
+      <div class="splash__loader" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="splash__loader-bar"></div>
+      </div>
+      <p class="splash__status" id="splash-status" aria-live="polite">Initializing sensors…</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN APP SHELL (Nav + Content)
+  ═══════════════════════════════════════════ -->
+  <div id="app-shell" class="app-shell hidden" role="main">
+
+    <!-- Status Bar -->
+    <div class="status-bar" aria-hidden="true">
+      <div class="status-bar__left">
+        <span class="status-time" id="status-time">23:37</span>
+      </div>
+      <div class="status-bar__notch"></div>
+      <div class="status-bar__right">
+        <span class="status-icon" title="Signal">
+          <svg viewBox="0 0 16 12" fill="none"><rect x="0" y="6" width="2" height="6" fill="#a3e635" rx="0.5"/><rect x="4" y="4" width="2" height="8" fill="#a3e635" rx="0.5"/><rect x="8" y="2" width="2" height="10" fill="#a3e635" rx="0.5"/><rect x="12" y="0" width="2" height="12" fill="#a3e635" rx="0.5"/></svg>
+        </span>
+        <span class="status-icon" title="WiFi">
+          <svg viewBox="0 0 16 12" fill="none"><path d="M8 11C8.8 11 9.5 10.3 9.5 9.5S8.8 8 8 8s-1.5.7-1.5 1.5S7.2 11 8 11Z" fill="#a3e635"/><path d="M4.5 7.5C5.5 6.3 6.7 5.5 8 5.5s2.5.8 3.5 2" stroke="#a3e635" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M1.5 5C3.2 3 5.5 2 8 2s4.8 1 6.5 3" stroke="#a3e635" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.5"/></svg>
+        </span>
+        <span class="status-battery" title="Battery">
+          <svg viewBox="0 0 20 11" fill="none"><rect x="0.5" y="0.5" width="16" height="10" rx="2" stroke="#a3e635"/><rect x="17" y="3" width="2.5" height="5" rx="1" fill="#a3e635" opacity="0.6"/><rect x="1.5" y="1.5" width="12" height="8" rx="1.5" fill="#a3e635" opacity="0.8"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area" id="content-area">
+
+      <!-- ── SCREEN A: Spatial Radar ── -->
+      <section id="screen-radar" class="app-screen screen--radar active" role="region" aria-label="Spatial Radar — Live Camera Feed">
+        <div class="radar-header">
+          <div class="radar-header__left">
+            <div class="live-badge" aria-label="Live feed active">
+              <span class="live-dot" aria-hidden="true"></span>
+              <span>LIVE</span>
+            </div>
+          </div>
+          <div class="radar-header__title">
+            <span class="header-icon" aria-hidden="true">◎</span>
+            Spatial Radar
+          </div>
+          <div class="radar-header__right">
+            <button class="icon-btn" id="btn-sound-toggle" aria-label="Toggle spatial audio" aria-pressed="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9L4 12H1v0h3l5 3V9z"/><path d="M12 6.5a5 5 0 0 1 0 11" stroke-width="1.8"/><path d="M15 4a8 8 0 0 1 0 16" stroke-width="1.5" opacity="0.5"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Camera HUD -->
+        <div class="camera-hud" id="camera-hud" role="img" aria-label="Camera view with object detection overlay">
+          <canvas id="camera-canvas" aria-hidden="true"></canvas>
+
+          <!-- Bounding Box Overlays -->
+          <div class="detection-layer" id="detection-layer" aria-hidden="true">
+            <!-- Dynamically populated by JS -->
+          </div>
+
+          <!-- HUD Corner Frames -->
+          <div class="hud-corners" aria-hidden="true">
+            <span class="hud-corner tl"></span>
+            <span class="hud-corner tr"></span>
+            <span class="hud-corner bl"></span>
+            <span class="hud-corner br"></span>
+          </div>
+
+          <!-- Scan Line -->
+          <div class="scan-line" aria-hidden="true"></div>
+
+          <!-- Proximity Meter Arc -->
+          <div class="proximity-arc" aria-hidden="true">
+            <svg viewBox="0 0 200 110" class="proximity-svg">
+              <defs>
+                <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#a3e635"/>
+                  <stop offset="60%" stop-color="#fbbf24"/>
+                  <stop offset="100%" stop-color="#ef4444"/>
+                </linearGradient>
+              </defs>
+              <path d="M10,100 A90,90 0 0,1 190,100" stroke="#1a1a1a" stroke-width="8" fill="none"/>
+              <path id="arc-fill" d="M10,100 A90,90 0 0,1 190,100" stroke="url(#arcGrad)" stroke-width="8" fill="none"
+                    stroke-dasharray="283" stroke-dashoffset="120" stroke-linecap="round"/>
+              <line id="arc-needle" x1="100" y1="100" x2="100" y2="20" stroke="#ffffff" stroke-width="2" stroke-linecap="round" transform="rotate(-25, 100, 100)"/>
+              <text x="100" y="95" text-anchor="middle" fill="#ffffff" font-size="10" font-family="JetBrains Mono">3.2m</text>
+            </svg>
+          </div>
+
+          <!-- Sound Direction Indicator -->
+          <div class="sound-direction" id="sound-direction" aria-hidden="true">
+            <div class="sound-dir-bar left" id="sd-left"></div>
+            <div class="sound-dir-label">◀ SPATIAL ▶</div>
+            <div class="sound-dir-bar right" id="sd-right"></div>
+          </div>
+        </div>
+
+        <!-- Detection Feed -->
+        <div class="detection-feed" role="region" aria-label="Detected objects" aria-live="polite">
+          <div class="detection-chips" id="detection-chips">
+            <div class="det-chip det-chip--safe" role="status">
+              <span class="det-chip__icon">🚶</span>
+              <span class="det-chip__label">Person</span>
+              <span class="det-chip__dist">4.1m</span>
+            </div>
+            <div class="det-chip det-chip--warn" role="status">
+              <span class="det-chip__icon">🪜</span>
+              <span class="det-chip__label">Steps</span>
+              <span class="det-chip__dist">2.8m</span>
+            </div>
+            <div class="det-chip det-chip--safe" role="status">
+              <span class="det-chip__icon">🚪</span>
+              <span class="det-chip__label">Door</span>
+              <span class="det-chip__dist">6.3m</span>
+            </div>
+            <div class="det-chip det-chip--danger" role="status">
+              <span class="det-chip__icon">🚗</span>
+              <span class="det-chip__label">Vehicle</span>
+              <span class="det-chip__dist">1.9m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Soundscape toggle bar -->
+        <div class="soundscape-bar">
+          <span class="soundscape-label">Soundscape</span>
+          <label class="toggle-switch" aria-label="Toggle soundscape mode">
+            <input type="checkbox" id="soundscape-toggle" checked aria-checked="true" role="switch">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="soundscape-mode-label" id="soundscape-mode">3D Spatial</span>
+        </div>
+      </section>
+
+      <!-- ── SCREEN B: Acoustic Analyzer ── -->
+      <section id="screen-acoustic" class="app-screen screen--acoustic" role="region" aria-label="Acoustic Environment Analyzer" hidden>
+        <div class="screen-header">
+          <div class="screen-header__title">
+            <span class="header-icon" aria-hidden="true">〜</span>
+            Acoustic Analyzer
+          </div>
+          <div class="screen-header__actions">
+            <button class="icon-btn" aria-label="Acoustic settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" opacity="0.5"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- dB Meter -->
+        <div class="db-meter-card" role="region" aria-label="Decibel level monitor">
+          <div class="db-meter-card__header">
+            <span class="card-label">Current dB Level</span>
+            <span class="sensory-badge" id="sensory-badge" aria-live="polite">NORMAL</span>
+          </div>
+          <div class="db-display" aria-live="polite" aria-label="Decibel reading">
+            <span class="db-value" id="db-value">62</span>
+            <span class="db-unit">dB</span>
+            <span class="db-label" id="db-label">Moderate</span>
+          </div>
+          <div class="db-bar-container" role="progressbar" aria-valuemin="0" aria-valuemax="120" aria-valuenow="62" aria-label="dB meter bar">
+            <div class="db-bar-zones">
+              <div class="db-zone db-zone--safe">Safe<br/><span>0–60</span></div>
+              <div class="db-zone db-zone--moderate">Moderate<br/><span>60–80</span></div>
+              <div class="db-zone db-zone--high">High<br/><span>80–100</span></div>
+              <div class="db-zone db-zone--danger">⚠ Danger<br/><span>100+</span></div>
+            </div>
+            <div class="db-bar-track">
+              <div class="db-bar-fill" id="db-bar-fill"></div>
+              <div class="db-bar-needle" id="db-bar-needle"></div>
+            </div>
+          </div>
+
+          <!-- Sensory Overload Warning -->
+          <div class="sensory-warning hidden" id="sensory-warning" role="alert" aria-live="assertive">
+            <div class="sensory-warning__icon">⚠</div>
+            <div class="sensory-warning__text">
+              <strong>Sensory Overload Alert</strong>
+              <span>Noise levels exceed safe thresholds for extended exposure</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frequency Spectrum Visualizer -->
+        <div class="spectrum-card" role="region" aria-label="Frequency spectrum visualizer">
+          <div class="spectrum-card__header">
+            <span class="card-label">Live Frequency Spectrum</span>
+            <div class="freq-legend">
+              <span class="freq-legend-item" style="--c:#06b6d4">Low</span>
+              <span class="freq-legend-item" style="--c:#a3e635">Mid</span>
+              <span class="freq-legend-item" style="--c:#fbbf24">High</span>
+            </div>
+          </div>
+          <div class="spectrum-visualizer">
+            <canvas id="spectrum-canvas" aria-hidden="true" aria-label="Frequency spectrum visualization"></canvas>
+          </div>
+          <div class="freq-labels" aria-hidden="true">
+            <span>20Hz</span><span>100Hz</span><span>500Hz</span><span>1kHz</span><span>4kHz</span><span>16kHz</span>
+          </div>
+        </div>
+
+        <!-- Noise Source Analysis -->
+        <div class="noise-sources-card" role="region" aria-label="Detected noise sources">
+          <div class="card-label">Dominant Noise Sources</div>
+          <div class="noise-sources-list" id="noise-sources-list" role="list">
+            <div class="noise-source" role="listitem">
+              <div class="noise-source__icon">🌬️</div>
+              <div class="noise-source__info">
+                <span class="noise-source__name">HVAC / Ventilation</span>
+                <div class="noise-source__bar"><div class="noise-source__fill" style="width:78%; background:#06b6d4"></div></div>
+              </div>
+              <span class="noise-source__db">68dB</span>
+            </div>
+            <div class="noise-source" role="listitem">
+              <div class="noise-source__icon">🚗</div>
+              <div class="noise-source__info">
+                <span class="noise-source__name">Traffic Echo</span>
+                <div class="noise-source__bar"><div class="noise-source__fill" style="width:55%; background:#fbbf24"></div></div>
+              </div>
+              <span class="noise-source__db">58dB</span>
+            </div>
+            <div class="noise-source" role="listitem">
+              <div class="noise-source__icon">👥</div>
+              <div class="noise-source__info">
+                <span class="noise-source__name">Crowd Resonance</span>
+                <div class="noise-source__bar"><div class="noise-source__fill" style="width:40%; background:#a3e635"></div></div>
+              </div>
+              <span class="noise-source__db">52dB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ear Health Timer -->
+        <div class="ear-health-card" role="region" aria-label="Ear health monitor">
+          <div class="ear-health-header">
+            <span class="card-label">Ear Health Timer</span>
+            <span class="ear-health-status status--ok" id="ear-health-status" aria-live="polite">✓ OK</span>
+          </div>
+          <div class="ear-health-details">
+            <div class="ear-health-stat">
+              <span class="stat-val" id="exposure-time">12m</span>
+              <span class="stat-label">Exposure</span>
+            </div>
+            <div class="ear-health-stat">
+              <span class="stat-val" id="safe-limit">2h 48m</span>
+              <span class="stat-label">Safe Limit</span>
+            </div>
+            <div class="ear-health-stat">
+              <span class="stat-val" id="dose-pct">7%</span>
+              <span class="stat-label">Daily Dose</span>
+            </div>
+          </div>
+          <div class="ear-dose-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="7">
+            <div class="ear-dose-fill" id="ear-dose-fill" style="width:7%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SCREEN C: PathFinder ── -->
+      <section id="screen-pathfinder" class="app-screen screen--pathfinder" role="region" aria-label="Smart Indoor and Outdoor PathFinder" hidden>
+        <div class="screen-header">
+          <div class="screen-header__title">
+            <span class="header-icon" aria-hidden="true">⬡</span>
+            PathFinder
+          </div>
+          <div class="screen-header__actions">
+            <button class="icon-btn" aria-label="Voice search destination" id="btn-voice-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Route Search Bar -->
+        <div class="route-search" role="search" aria-label="Destination search">
+          <div class="route-search__input-wrap">
+            <span class="route-search__icon" aria-hidden="true">⬡</span>
+            <span class="route-search__label">Current Location</span>
+            <span class="route-search__badge">GPS</span>
+          </div>
+          <div class="route-search__divider" aria-hidden="true">
+            <span class="divider-line"></span>
+            <span class="divider-icon">▼</span>
+          </div>
+          <div class="route-search__input-wrap route-search__input-wrap--dest">
+            <span class="route-search__icon" aria-hidden="true">◉</span>
+            <input type="text" class="route-search__dest-input" id="dest-input" placeholder="Search destination…" aria-label="Enter destination" value="Main Entrance Ramp" />
+          </div>
+        </div>
+
+        <!-- Environment Toggle -->
+        <div class="env-toggle-row" role="group" aria-label="Environment type">
+          <button class="env-btn env-btn--active" id="env-indoor" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            Indoor
+          </button>
+          <button class="env-btn" id="env-outdoor" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            Outdoor
+          </button>
+        </div>
+
+        <!-- Haptic Compass -->
+        <div class="haptic-compass-card" role="region" aria-label="Haptic compass guidance">
+          <div class="compass-ring" id="compass-ring" aria-hidden="true">
+            <canvas id="compass-canvas"></canvas>
+            <div class="compass-needle-wrap" id="compass-needle-wrap">
+              <div class="compass-needle"></div>
+            </div>
+            <div class="compass-center">
+              <span class="compass-bearing" id="compass-bearing" aria-live="polite" aria-label="Bearing">NE</span>
+              <span class="compass-deg" id="compass-deg">47°</span>
+            </div>
+          </div>
+          <div class="compass-instructions" aria-live="polite">
+            <div class="compass-step active" id="compass-step">
+              <span class="step-arrow" aria-hidden="true">↗</span>
+              <span class="step-text">Bear northeast on Main Corridor</span>
+              <span class="step-dist">~18m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step-by-step Directions -->
+        <div class="directions-card" role="region" aria-label="Turn-by-turn directions">
+          <div class="card-label">Directions</div>
+          <ol class="directions-list" aria-label="Step by step directions">
+            <li class="dir-step dir-step--active" aria-current="step">
+              <div class="dir-step__icon" aria-hidden="true">↗</div>
+              <div class="dir-step__info">
+                <span class="dir-step__text">Head northeast — Main Corridor</span>
+                <span class="dir-step__meta">18m · Surface: flat tile</span>
+              </div>
+              <div class="dir-step__haptic" title="Haptic: gentle pulse" aria-label="Haptic: gentle pulse">〜</div>
+            </li>
+            <li class="dir-step" aria-current="false">
+              <div class="dir-step__icon" aria-hidden="true">⬆</div>
+              <div class="dir-step__info">
+                <span class="dir-step__text">Continue straight past Elevator B</span>
+                <span class="dir-step__meta">32m · Surface: carpeted</span>
+              </div>
+              <div class="dir-step__haptic" title="Haptic: steady pulse" aria-label="Haptic: steady pulse">—</div>
+            </li>
+            <li class="dir-step" aria-current="false">
+              <div class="dir-step__icon dir-step__icon--warn" aria-hidden="true">⚠</div>
+              <div class="dir-step__info">
+                <span class="dir-step__text">⚠ 3 steps ahead — handrail left</span>
+                <span class="dir-step__meta">5m · Obstacle: steps</span>
+              </div>
+              <div class="dir-step__haptic dir-step__haptic--warn" title="Haptic: double-tick warning" aria-label="Haptic: double-tick warning">!!</div>
+            </li>
+            <li class="dir-step" aria-current="false">
+              <div class="dir-step__icon" aria-hidden="true">◉</div>
+              <div class="dir-step__info">
+                <span class="dir-step__text">Arrive — Main Entrance Ramp</span>
+                <span class="dir-step__meta">Accessibility: ramp + auto-door</span>
+              </div>
+              <div class="dir-step__haptic" title="Haptic: arrival pulse" aria-label="Haptic: arrival triple pulse">✓</div>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Saved Routes -->
+        <div class="saved-routes-card" role="region" aria-label="Saved safe routes">
+          <div class="saved-routes-header">
+            <span class="card-label">Saved Safe Routes</span>
+            <button class="add-route-btn" aria-label="Add new saved route">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <div class="saved-routes-list" role="list">
+            <div class="saved-route" role="listitem" tabindex="0" aria-label="Main Entrance Ramp, accessible route, 55 meters">
+              <div class="saved-route__icon" aria-hidden="true">♿</div>
+              <div class="saved-route__info">
+                <span class="saved-route__name">Main Entrance Ramp</span>
+                <span class="saved-route__meta">Accessible · 55m · ●●●●○ rating</span>
+              </div>
+              <button class="saved-route__play" aria-label="Start this route">▶</button>
+            </div>
+            <div class="saved-route" role="listitem" tabindex="0" aria-label="Elevator B, quiet route, 32 meters">
+              <div class="saved-route__icon" aria-hidden="true">🛗</div>
+              <div class="saved-route__info">
+                <span class="saved-route__name">Elevator B</span>
+                <span class="saved-route__meta">Quiet · 32m · ●●●●● rating</span>
+              </div>
+              <button class="saved-route__play" aria-label="Start this route">▶</button>
+            </div>
+            <div class="saved-route" role="listitem" tabindex="0" aria-label="East Exit, outdoor route, 88 meters">
+              <div class="saved-route__icon" aria-hidden="true">🚪</div>
+              <div class="saved-route__info">
+                <span class="saved-route__name">East Exit</span>
+                <span class="saved-route__meta">Outdoor · 88m · ●●●○○ rating</span>
+              </div>
+              <button class="saved-route__play" aria-label="Start this route">▶</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SCREEN D: Emergency & Companion ── -->
+      <section id="screen-emergency" class="app-screen screen--emergency" role="region" aria-label="Emergency and Companion Mode" hidden>
+        <div class="screen-header screen-header--emergency">
+          <div class="screen-header__title">
+            <span class="header-icon" aria-hidden="true">⚡</span>
+            Emergency & Companion
+          </div>
+        </div>
+
+        <!-- SOS Slide Trigger -->
+        <div class="sos-card" role="region" aria-label="Emergency SOS trigger">
+          <div class="sos-card__status" aria-live="polite" id="sos-status">
+            <div class="sos-idle-ring" aria-hidden="true"></div>
+            <div class="sos-idle-ring sos-ring-2" aria-hidden="true"></div>
+            <div class="sos-icon" aria-hidden="true">SOS</div>
+          </div>
+          <div class="sos-slide-container" role="group" aria-label="SOS slide to activate">
+            <div class="sos-slide-track" id="sos-slide-track" aria-hidden="true">
+              <div class="sos-slide-fill" id="sos-slide-fill"></div>
+              <div class="sos-slide-text">
+                <span class="sos-slide-arrows">▶ ▶ ▶</span>
+                Slide to activate SOS
+              </div>
+              <div class="sos-slide-thumb" id="sos-slide-thumb" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="SOS activation slider">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13,6 19,12 13,18"/><polyline points="6,6 12,12 6,18" opacity="0.5"/></svg>
+              </div>
+            </div>
+            <div class="sos-slide-hold-hint" aria-hidden="true">Or hold 3 fingers to trigger immediately</div>
+          </div>
+        </div>
+
+        <!-- GPS Broadcast -->
+        <div class="gps-broadcast-card" role="region" aria-label="Live GPS broadcast status">
+          <div class="gps-broadcast-header">
+            <span class="card-label">Location Broadcast</span>
+            <div class="broadcast-status" id="broadcast-status">
+              <span class="broadcast-dot" aria-hidden="true"></span>
+              <span>Ready</span>
+            </div>
+          </div>
+          <div class="gps-coords" aria-live="polite" id="gps-coords">
+            <span class="coord-label">LAT</span><span class="coord-val" id="gps-lat">51.5074° N</span>
+            <span class="coord-label">LON</span><span class="coord-val" id="gps-lon">0.1278° W</span>
+            <span class="coord-label">ACC</span><span class="coord-val">±3m</span>
+          </div>
+        </div>
+
+        <!-- Trusted Contacts -->
+        <div class="contacts-card" role="region" aria-label="Trusted emergency contacts">
+          <div class="contacts-header">
+            <span class="card-label">Trusted Contacts</span>
+            <button class="add-route-btn" aria-label="Add trusted contact">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+          <div class="contacts-list" role="list">
+            <div class="contact-item" role="listitem" tabindex="0" aria-label="Alex Chen, emergency contact, notified via SMS and App">
+              <div class="contact-avatar" aria-hidden="true" style="background: linear-gradient(135deg, #06b6d4, #3b82f6)">AC</div>
+              <div class="contact-info">
+                <span class="contact-name">Alex Chen</span>
+                <span class="contact-notify">SMS + App Notification</span>
+              </div>
+              <div class="contact-check active" aria-label="Active" aria-hidden="true">✓</div>
+            </div>
+            <div class="contact-item" role="listitem" tabindex="0" aria-label="Sam Rivera, emergency contact, notified via SMS">
+              <div class="contact-avatar" aria-hidden="true" style="background: linear-gradient(135deg, #a3e635, #22c55e)">SR</div>
+              <div class="contact-info">
+                <span class="contact-name">Sam Rivera</span>
+                <span class="contact-notify">SMS Only</span>
+              </div>
+              <div class="contact-check active" aria-label="Active" aria-hidden="true">✓</div>
+            </div>
+            <div class="contact-item" role="listitem" tabindex="0" aria-label="Emergency Services 999">
+              <div class="contact-avatar" aria-hidden="true" style="background: linear-gradient(135deg, #ef4444, #f97316)">999</div>
+              <div class="contact-info">
+                <span class="contact-name">Emergency Services</span>
+                <span class="contact-notify">Auto-dial on SOS</span>
+              </div>
+              <div class="contact-check active" aria-label="Active" aria-hidden="true">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Companion Mode -->
+        <div class="companion-card" role="region" aria-label="Companion mode settings">
+          <div class="companion-header">
+            <span class="card-label">Companion Mode</span>
+            <label class="toggle-switch" aria-label="Enable companion mode">
+              <input type="checkbox" id="companion-toggle" aria-checked="false" role="switch">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="companion-options">
+            <div class="companion-option">
+              <span class="companion-option__icon" aria-hidden="true">📍</span>
+              <span class="companion-option__label">Share live location for 2 hours</span>
+            </div>
+            <div class="companion-option">
+              <span class="companion-option__icon" aria-hidden="true">🎥</span>
+              <span class="companion-option__label">Send 5s spatial clip on SOS</span>
+            </div>
+            <div class="companion-option">
+              <span class="companion-option__icon" aria-hidden="true">🔔</span>
+              <span class="companion-option__label">Notify if device goes stationary</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         BOTTOM NAVIGATION
+    ═══════════════════════════════════════════ -->
+    <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+      <button class="nav-item nav-item--active" id="nav-radar" aria-label="Spatial Radar screen" aria-current="page" role="tab">
+        <div class="nav-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="2"/>
+            <path d="M12 2a10 10 0 0 1 0 20M2 12a10 10 0 0 1 20 0" opacity="0.3"/>
+            <path d="M12 5a7 7 0 0 1 0 14M5 12a7 7 0 0 1 14 0" opacity="0.6"/>
+          </svg>
+        </div>
+        <span class="nav-item__label">Radar</span>
+        <div class="nav-item__indicator" aria-hidden="true"></div>
+      </button>
+      <button class="nav-item" id="nav-acoustic" aria-label="Acoustic Analyzer screen" aria-current="false" role="tab">
+        <div class="nav-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 20V4M8 16V8M4 13v-2M16 18V6M20 15V9"/>
+          </svg>
+        </div>
+        <span class="nav-item__label">Acoustic</span>
+        <div class="nav-item__indicator" aria-hidden="true"></div>
+      </button>
+      <button class="nav-item nav-item--center" id="nav-pathfinder" aria-label="PathFinder screen" aria-current="false" role="tab">
+        <div class="nav-center-ring" aria-hidden="true"></div>
+        <div class="nav-item__icon nav-item__icon--center" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3,11 22,2 13,21 11,13 3,11"/>
+          </svg>
+        </div>
+        <span class="nav-item__label">Navigate</span>
+        <div class="nav-item__indicator" aria-hidden="true"></div>
+      </button>
+      <button class="nav-item" id="nav-emergency" aria-label="Emergency and Companion screen" aria-current="false" role="tab">
+        <div class="nav-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6.29 6.29l.96-.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <span class="nav-item__label">Emergency</span>
+        <div class="nav-item__indicator" aria-hidden="true"></div>
+      </button>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════
+         GLOBAL GESTURE OVERLAY (invisible)
+    ═══════════════════════════════════════════ -->
+    <div id="gesture-overlay" class="gesture-overlay" aria-hidden="true"></div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Voice Command Overlay -->
+    <div id="voice-overlay" class="voice-overlay hidden" role="dialog" aria-modal="true" aria-label="Voice command input">
+      <div class="voice-overlay__bg"></div>
+      <div class="voice-overlay__content">
+        <div class="voice-rings">
+          <div class="voice-ring vr-1" aria-hidden="true"></div>
+          <div class="voice-ring vr-2" aria-hidden="true"></div>
+          <div class="voice-ring vr-3" aria-hidden="true"></div>
+        </div>
+        <div class="voice-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#a3e635" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+        </div>
+        <p class="voice-listening">Listening…</p>
+        <p class="voice-hint">Speak a destination or command</p>
+        <button class="voice-cancel" id="voice-cancel" aria-label="Cancel voice input">Cancel</button>
+      </div>
+    </div>
+
+    <!-- 3-Finger Emergency HUD -->
+    <div id="emergency-hud" class="emergency-hud hidden" role="alertdialog" aria-modal="true" aria-label="Emergency guidance activated">
+      <div class="emergency-hud__content">
+        <div class="emergency-hud__icon" aria-hidden="true">⚡</div>
+        <h2 class="emergency-hud__title">Emergency Guidance</h2>
+        <p class="emergency-hud__subtitle">Nearest exit: <strong>East Exit — 28m</strong></p>
+        <div class="emergency-hud__actions">
+          <button class="emergency-hud__sos-btn" id="emergency-sos-btn" aria-label="Activate full SOS">Activate SOS</button>
+          <button class="emergency-hud__dismiss" id="emergency-dismiss" aria-label="Dismiss emergency guidance">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/gestures.js"></script>
+  <script src="js/onboarding.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/canvas-radar.js"></script>
+  <script src="js/canvas-spectrum.js"></script>
+  <script src="js/canvas-compass.js"></script>
+  <script src="js/db-meter.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/emergency.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

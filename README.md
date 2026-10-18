@@ -163,6 +163,42 @@ Open `http://localhost:3000` in Chrome, Safari, or Edge.
 
 ---
 
+## 🤖 Native Android Mobile App
+
+EchoPulse includes a complete native Android application project built with **Capacitor 8**, **Android SDK Platform 36 (Android 15 / 16 Preview)**, and **OpenJDK 21**.
+
+### 📦 Pre-Built APK
+You can directly download or transfer the debug APK:
+- **Binary**: [`EchoPulse-debug.apk`](EchoPulse-debug.apk) (approx. 4.8 MB)
+- Located at: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+### 🛠️ Building the Native Android APK from Source
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Sync web assets into Android project
+npm run cap:build
+
+# 3. Build Debug APK with Gradle
+cd android
+./gradlew assembleDebug
+# On Windows:
+# gradlew.bat assembleDebug
+```
+The compiled APK will be output to: `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+### 📱 Android Native Permissions Configured
+- `CAMERA` (Live spatial radar feed)
+- `RECORD_AUDIO` (Real-time acoustic analysis & decibel metering)
+- `MODIFY_AUDIO_SETTINGS` (Low-latency audio engine routing)
+- `ACCESS_FINE_LOCATION` & `ACCESS_COARSE_LOCATION` (GPS compass telemetry & emergency SOS)
+- `VIBRATE` (Precision haptic tactile pulse patterns)
+- `WAKE_LOCK` (Sustained sensory navigation)
+
+---
+
 ## ♿ Accessibility (A11y) & Neurodivergent UX
 
 - **VoiceOver & TalkBack Support**: Strict semantic HTML with full ARIA regions (`role="region"`, `role="alert"`, `role="status"`).
