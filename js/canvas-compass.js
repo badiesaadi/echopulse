@@ -1,5 +1,8 @@
 /* ═══════════════════════════════════════════════════════
    EchoPulse — Compass Canvas Renderer
+   Dual Mode:
+   1. Live Device Orientation & Hardware Magnetometer
+   2. Waypoint Step Navigation Simulation
    Animated rotating compass ring with degree marks,
    cardinal labels, and bearing indicator
 ═══════════════════════════════════════════════════════ */
@@ -12,8 +15,14 @@ const CompassRenderer = (() => {
   let targetBearing = 47;
   let tick = 0;
   let raf;
+  let isLiveSensor = false;
 
   const CARDINALS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  const DETAILED_CARDINALS = [
+    'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+    'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW',
+  ];
+
   const STEPS = [
     { bearing: 47,  label: 'NE', text: 'Bear northeast on Main Corridor', dist: '~18m' },
     { bearing: 90,  label: 'E',  text: 'Turn right — East Wing',         dist: '~32m' },
@@ -29,8 +38,32 @@ const CompassRenderer = (() => {
     ctx = canvas.getContext('2d');
     loop();
 
-    // Auto-advance steps
-    setInterval(advanceStep, 6000);
+    // Initialize physical compass sensor
+    HardwareSensors.initOrientation();
+    HardwareSensors.on('orientation', data => {
+      if (data && data.heading !== null) {
+        isLiveSensor = true;
+        targetBearing = data.heading;
+        updateUIWithHeading(data.heading);
+      }
+    });
+
+    // Auto-advance simulated steps only if no live sensor is active
+    setInterval(() => {
+      if (!isLiveSensor) advanceStep();
+    }, 6000);
+  }
+
+  function updateUIWithHeading(deg) {
+    const bearingEl = document.getElementById('compass-bearing');
+    const degEl     = document.getElementById('compass-deg');
+    const roundedDeg = Math.round(deg) % 360;
+
+    const cardinalIdx = Math.round(roundedDeg / 22.5) % 16;
+    const cardinalText = DETAILED_CARDINALS[cardinalIdx];
+
+    if (bearingEl) bearingEl.textContent = cardinalText;
+    if (degEl)     degEl.textContent     = `${roundedDeg}°`;
   }
 
   function advanceStep() {
@@ -63,9 +96,13 @@ const CompassRenderer = (() => {
     raf = requestAnimationFrame(loop);
     tick += 0.01;
 
-    // Smooth bearing interpolation
-    const diff = targetBearing - bearing;
-    bearing += diff * 0.04;
+    // Smooth bearing interpolation handling 360 wrap-around
+    let diff = (targetBearing - bearing) % 360;
+    if (diff < -180) diff += 360;
+    if (diff > 180)  diff -= 360;
+
+    const speed = isLiveSensor ? 0.15 : 0.04;
+    bearing = (bearing + diff * speed + 360) % 360;
 
     draw();
   }
@@ -129,7 +166,7 @@ const CompassRenderer = (() => {
     const nGlowY = cy + Math.sin(northAngle) * (R - 5);
 
     const northGlow = ctx.createRadialGradient(nGlowX, nGlowY, 0, nGlowX, nGlowY, 12);
-    northGlow.addColorStop(0, 'rgba(163,230,53,0.3)');
+    northGlow.addColorStop(0, 'rgba(163,230,53,0.35)');
     northGlow.addColorStop(1, 'transparent');
     ctx.fillStyle = northGlow;
     ctx.beginPath();

@@ -4,7 +4,7 @@
 ═══════════════════════════════════════════════════════ */
 'use strict';
 
-const CACHE_NAME = 'echopulse-v1.0.0';
+const CACHE_NAME = 'echopulse-v1.1.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -16,6 +16,7 @@ const ASSETS_TO_CACHE = [
   './styles/onboarding.css',
   './styles/settings.css',
   './js/utils.js',
+  './js/sensors.js',
   './js/audio.js',
   './js/gestures.js',
   './js/onboarding.js',

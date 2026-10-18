@@ -84,9 +84,9 @@
       <section id="screen-radar" class="app-screen screen--radar active" role="region" aria-label="Spatial Radar — Live Camera Feed">
         <div class="radar-header">
           <div class="radar-header__left">
-            <div class="live-badge" aria-label="Live feed active">
-              <span class="live-dot" aria-hidden="true"></span>
-              <span>LIVE</span>
+            <div class="live-badge" id="camera-badge" aria-label="Camera mode: Simulation or Live">
+              <span class="live-dot" id="camera-dot" aria-hidden="true"></span>
+              <span id="camera-mode-text">RADAR</span>
             </div>
           </div>
           <div class="radar-header__title">
@@ -94,6 +94,9 @@
             Spatial Radar
           </div>
           <div class="radar-header__right">
+            <button class="icon-btn" id="btn-camera-toggle" aria-label="Toggle camera stream" title="Toggle Live Camera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
             <button class="icon-btn" id="btn-sound-toggle" aria-label="Toggle spatial audio" aria-pressed="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9L4 12H1v0h3l5 3V9z"/><path d="M12 6.5a5 5 0 0 1 0 11" stroke-width="1.8"/><path d="M15 4a8 8 0 0 1 0 16" stroke-width="1.5" opacity="0.5"/></svg>
             </button>
@@ -102,6 +105,7 @@
 
         <!-- Camera HUD -->
         <div class="camera-hud" id="camera-hud" role="img" aria-label="Camera view with object detection overlay">
+          <video id="camera-video" playsinline autoplay muted style="display:none;"></video>
           <canvas id="camera-canvas" aria-hidden="true"></canvas>
 
           <!-- Bounding Box Overlays -->
@@ -191,6 +195,9 @@
             Acoustic Analyzer
           </div>
           <div class="screen-header__actions">
+            <button class="icon-btn" id="btn-mic-toggle" aria-label="Toggle live microphone" title="Toggle Live Microphone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+            </button>
             <button class="icon-btn" aria-label="Acoustic settings">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" opacity="0.5"/></svg>
             </button>
@@ -201,7 +208,11 @@
         <div class="db-meter-card" role="region" aria-label="Decibel level monitor">
           <div class="db-meter-card__header">
             <span class="card-label">Current dB Level</span>
-            <span class="sensory-badge" id="sensory-badge" aria-live="polite">NORMAL</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="live-dot" id="mic-live-dot" style="display:none;" aria-hidden="true"></span>
+              <span class="sensory-badge" id="mic-mode-badge" style="background:rgba(255,255,255,0.08); font-size:10px;">SIM</span>
+              <span class="sensory-badge" id="sensory-badge" aria-live="polite">NORMAL</span>
+            </div>
           </div>
           <div class="db-display" aria-live="polite" aria-label="Decibel reading">
             <span class="db-value" id="db-value">62</span>
@@ -489,7 +500,7 @@
           <div class="gps-coords" aria-live="polite" id="gps-coords">
             <span class="coord-label">LAT</span><span class="coord-val" id="gps-lat">51.5074° N</span>
             <span class="coord-label">LON</span><span class="coord-val" id="gps-lon">0.1278° W</span>
-            <span class="coord-label">ACC</span><span class="coord-val">±3m</span>
+            <span class="coord-label">ACC</span><span class="coord-val" id="gps-acc">±3m</span>
           </div>
         </div>
 
@@ -643,6 +654,7 @@
 
   <!-- Scripts -->
   <script src="js/utils.js"></script>
+  <script src="js/sensors.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/gestures.js"></script>
   <script src="js/onboarding.js"></script>

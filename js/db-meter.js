@@ -1,9 +1,11 @@
 /* ═══════════════════════════════════════════════════════
    EchoPulse — dB Meter Controller
-   Simulates live microphone dB readings with:
-   - Dynamic value oscillation
+   Dual Mode:
+   1. Live Microphone analysis via Web Audio Analyser (Real RMS & dB SPL)
+   2. Automated Realistic Acoustic Scenarios Simulation
+   - Dynamic real-time meter oscillation
    - Sensory overload badge + warning
-   - Ear health dose tracking
+   - NIOSH ear health dose tracking
    - Bar + needle position
 ═══════════════════════════════════════════════════════ */
 'use strict';
@@ -13,8 +15,9 @@ const DBMeter = (() => {
   let targetDB   = 62;
   let exposureSec = 720; // 12 minutes in seconds
   let tick = 0;
+  let isLiveMic = false;
 
-  // dB level scenarios (cycles)
+  // dB level scenarios (cycles for simulation fallback)
   const SCENARIOS = [
     { db: 58, label: 'Quiet',    badge: 'SAFE',     badgeClass: '' },
     { db: 66, label: 'Moderate', badge: 'NORMAL',   badgeClass: '' },
@@ -30,18 +33,77 @@ const DBMeter = (() => {
     setInterval(tick_update, 100);
     scenarioTimer = setInterval(advanceScenario, 8000);
     setInterval(updateExposureTimer, 1000);
+
+    // Bind microphone toggle
+    const micBtn = document.getElementById('btn-mic-toggle');
+    if (micBtn) {
+      micBtn.addEventListener('click', toggleLiveMic);
+    }
+
+    // Auto-attempt mic if already granted
+    HardwareSensors.on('mic', data => {
+      isLiveMic = data.active;
+      updateMicUI(data.active);
+    });
+  }
+
+  async function toggleLiveMic() {
+    if (isLiveMic) {
+      isLiveMic = false;
+      updateMicUI(false);
+      EP.toast('Switched to simulated acoustic profile', '🎙️', 2000);
+    } else {
+      const ok = await HardwareSensors.initMicrophone();
+      if (ok) {
+        isLiveMic = true;
+        updateMicUI(true);
+        EP.toast('Live microphone connected — Monitoring room dB', '🎙️', 3000);
+      } else {
+        EP.toast('Microphone access denied — using simulation', '⚠', 3000);
+      }
+    }
+  }
+
+  function updateMicUI(live) {
+    const badge = document.getElementById('mic-mode-badge');
+    const dot = document.getElementById('mic-live-dot');
+    const btn = document.getElementById('btn-mic-toggle');
+
+    if (badge) {
+      badge.textContent = live ? 'LIVE MIC' : 'SIM';
+      badge.style.color = live ? EP.LIME : 'rgba(255,255,255,0.6)';
+    }
+    if (dot) {
+      dot.style.display = live ? 'inline-block' : 'none';
+      dot.classList.toggle('active', live);
+    }
+    if (btn) {
+      btn.style.color = live ? EP.LIME : '';
+      btn.setAttribute('aria-pressed', live ? 'true' : 'false');
+    }
   }
 
   function tick_update() {
     tick++;
-    // Small random oscillation around target
-    const noise = EP.rand(-1.5, 1.5);
-    currentDB = EP.lerp(currentDB, targetDB + noise, 0.12);
+
+    if (isLiveMic) {
+      const liveDb = HardwareSensors.getLiveDecibels();
+      if (liveDb !== null) {
+        currentDB = EP.lerp(currentDB, liveDb, 0.25);
+      }
+    } else {
+      // Small random oscillation around target in simulation
+      const noise = EP.rand(-1.5, 1.5);
+      currentDB = EP.lerp(currentDB, targetDB + noise, 0.12);
+    }
+
     currentDB = EP.clamp(currentDB, 0, 120);
     update();
   }
 
   function advanceScenario() {
+    if (isLiveMic) return; // Do not auto-advance scenarios when measuring real microphone!
+
     scenarioIdx = (scenarioIdx + 1) % SCENARIOS.length;
     const sc = SCENARIOS[scenarioIdx];
     targetDB = sc.db;
@@ -49,10 +111,10 @@ const DBMeter = (() => {
     if (sc.badgeClass === 'danger') {
       AudioEngine.obstacleWarning(0);
       EP.haptic('warning');
-      document.getElementById('sensory-warning').classList.remove('hidden');
+      document.getElementById('sensory-warning')?.classList.remove('hidden');
       EP.toast('⚠ High noise — Sensory overload risk', '🔊', 4000);
     } else {
-      document.getElementById('sensory-warning').classList.add('hidden');
+      document.getElementById('sensory-warning')?.classList.add('hidden');
     }
 
     if (sc.badgeClass === 'warn') {
@@ -66,32 +128,60 @@ const DBMeter = (() => {
     const pct   = currentDB / 120;
 
     // Update value display
-    const valEl  = document.getElementById('db-value');
-    const barEl  = document.getElementById('db-bar-fill');
-    const needle = document.getElementById('db-bar-needle');
-    const badge  = document.getElementById('sensory-badge');
-    const labelEl = document.getElementById('db-label');
+    const valEl     = document.getElementById('db-value');
+    const barEl     = document.getElementById('db-bar-fill');
+    const needle    = document.getElementById('db-bar-needle');
+    const badge     = document.getElementById('sensory-badge');
+    const labelEl   = document.getElementById('db-label');
+    const warnAlert = document.getElementById('sensory-warning');
     if (!valEl) return;
 
     valEl.textContent = db;
     if (barEl)  barEl.style.width  = `${pct * 100}%`;
     if (needle) needle.style.left  = `${pct * 100}%`;
 
-    // Color shift
-    let color;
-    if (db < 60)       color = EP.LIME;
-    else if (db < 80)  color = EP.AMBER;
-    else if (db < 100) color = '#f97316';
-    else               color = EP.DANGER;
-    valEl.style.color = color;
+    // Dynamic sensory badge & labels
+    let label = 'Moderate';
+    let badgeText = 'NORMAL';
+    let badgeClass = '';
+    let color = EP.LIME;
 
-    // Badge
-    const sc = SCENARIOS[scenarioIdx];
-    if (badge) {
-      badge.textContent = sc.badge;
-      badge.className   = `sensory-badge ${sc.badgeClass}`;
+    if (db < 60) {
+      label = 'Quiet';
+      badgeText = 'SAFE';
+      color = EP.LIME;
+    } else if (db < 75) {
+      label = 'Moderate';
+      badgeText = 'NORMAL';
+      color = EP.AMBER;
+    } else if (db < 85) {
+      label = 'Loud';
+      badgeText = 'ELEVATED';
+      badgeClass = 'warn';
+      color = '#f97316';
+    } else {
+      label = 'Very Loud';
+      badgeText = 'HIGH RISK';
+      badgeClass = 'danger';
+      color = EP.DANGER;
     }
-    if (labelEl) labelEl.textContent = sc.label;
+
+    valEl.style.color = color;
+    if (badge) {
+      badge.textContent = badgeText;
+      badge.className   = `sensory-badge ${badgeClass}`;
+    }
+    if (labelEl) labelEl.textContent = label;
+
+    // Sensory alert visibility
+    if (warnAlert) {
+      if (db >= 85) {
+        warnAlert.classList.remove('hidden');
+        if (tick % 50 === 0) EP.haptic('warning');
+      } else {
+        warnAlert.classList.add('hidden');
+      }
+    }
 
     // ARIA update
     const barContainer = document.querySelector('.db-bar-container');
@@ -139,5 +229,5 @@ const DBMeter = (() => {
     return `${m}m`;
   }
 
-  return { init };
+  return { init, toggleLiveMic };
 })();

@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════════════════════
    EchoPulse — Frequency Spectrum Visualizer
-   Animated canvas FFT-style spectrum display
-   with animated bars grouped by Low/Mid/High bands
+   Dual Mode:
+   1. Live Microphone Real-Time FFT Frequency Analyzer
+   2. Simulated Noise Source Profiles (HVAC, Traffic, Crowd)
+   Visualizer grouped by Low/Mid/High acoustic frequency bands
 ═══════════════════════════════════════════════════════ */
 'use strict';
 
@@ -11,12 +13,13 @@ const SpectrumRenderer = (() => {
   let tick = 0;
   const BAR_COUNT = 40;
   let bars = [];
+  const freqBuffer = new Uint8Array(256);
 
   // Band color mapping
   const BANDS = [
     { end: Math.floor(BAR_COUNT * 0.25), color: EP.CYAN   }, // Low
     { end: Math.floor(BAR_COUNT * 0.70), color: EP.LIME   }, // Mid
-    { end: BAR_COUNT,                    color: EP.AMBER   }, // High
+    { end: BAR_COUNT,                    color: EP.AMBER  }, // High
   ];
 
   // Simulated noise source profiles (frequency envelopes)
@@ -53,14 +56,32 @@ const SpectrumRenderer = (() => {
   }
 
   function updateBars() {
-    const t = tick;
-    const profileFn = PROFILES[activeProfile] || PROFILES.hvac;
-    const dbVal = parseInt(document.getElementById('db-value')?.textContent || '62');
-    const gain  = EP.mapRange(dbVal, 0, 120, 0.2, 1.0);
+    const hasLiveMic = HardwareSensors.getLiveFrequencyData(freqBuffer);
 
-    for (let i = 0; i < BAR_COUNT; i++) {
-      targetBars[i] = EP.clamp(profileFn(i, t) * gain + EP.rand(-0.05, 0.05), 0.02, 1.0);
-      bars[i] = EP.lerp(bars[i], targetBars[i], 0.15);
+    if (hasLiveMic) {
+      // Map 256 FFT frequency bins into 40 visual bars
+      const step = Math.floor(freqBuffer.length / BAR_COUNT);
+      for (let i = 0; i < BAR_COUNT; i++) {
+        let sum = 0;
+        for (let j = 0; j < step; j++) {
+          sum += freqBuffer[i * step + j] || 0;
+        }
+        const avg = sum / step;
+        const normalized = EP.clamp(avg / 255, 0.02, 1.0);
+        targetBars[i] = normalized;
+        bars[i] = EP.lerp(bars[i], targetBars[i], 0.25);
+      }
+    } else {
+      // Simulation mode
+      const t = tick;
+      const profileFn = PROFILES[activeProfile] || PROFILES.hvac;
+      const dbVal = parseInt(document.getElementById('db-value')?.textContent || '62');
+      const gain  = EP.mapRange(dbVal, 0, 120, 0.2, 1.0);
+
+      for (let i = 0; i < BAR_COUNT; i++) {
+        targetBars[i] = EP.clamp(profileFn(i, t) * gain + EP.rand(-0.05, 0.05), 0.02, 1.0);
+        bars[i] = EP.lerp(bars[i], targetBars[i], 0.15);
+      }
     }
   }
 
@@ -99,35 +120,17 @@ const SpectrumRenderer = (() => {
       // Peak cap
       const peakY = y - 2;
       ctx.fillStyle = color;
-      ctx.fillRect(x + gap / 2, peakY, bw, 2);
+      ctx.fillRect(x + gap / 2, Math.max(0, peakY), bw, 1.5);
     }
-
-    // Horizontal grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth   = 0.5;
-    [0.25, 0.5, 0.75].forEach(pct => {
-      const y = H * (1 - pct);
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
-    });
-
-    // Frequency cursor line (follows time)
-    const cursorX = (tick * 8) % W;
-    ctx.strokeStyle = 'rgba(163,230,53,0.12)';
-    ctx.lineWidth   = 1;
-    ctx.beginPath();
-    ctx.moveTo(cursorX, 0);
-    ctx.lineTo(cursorX, H);
-    ctx.stroke();
   }
 
   function setProfile(name) {
     if (PROFILES[name]) activeProfile = name;
   }
 
-  function destroy() { cancelAnimationFrame(raf); }
+  function destroy() {
+    cancelAnimationFrame(raf);
+  }
 
   return { init, setProfile, destroy };
 })();
