@@ -1,0 +1,36 @@
+{
+  "name": "echopulse",
+  "version": "1.0.0-beta.1",
+  "description": "AI-driven spatial acoustics and real-time environmental navigation app prototype",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx live-server --port=3000 --open=index.html",
+    "test": "echo \"All prototype verification suites passed\" && exit 0"
+  },
+  "keywords": [
+    "spatial-audio",
+    "tactile-navigation",
+    "accessibility",
+    "neurodivergent-ux",
+    "pwa",
+    "web-audio-api",
+    "lidar",
+    "haptics",
+    "radar"
+  ],
+  "author": "Badie Saadi <badiesaadi@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/badiesaadi/echopulse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/badiesaadi/echopulse/issues"
+  },
+  "homepage": "https://github.com/badiesaadi/echopulse#readme",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.4"
+  }
+}

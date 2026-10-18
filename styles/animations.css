@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════
+   EchoPulse — Animations & Keyframes
+═══════════════════════════════════════════════════════ */
+
+/* ── Splash / Boot ── */
+@keyframes logo-ring-expand {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+/* ── Live dot blink ── */
+@keyframes live-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Scan Line ── */
+@keyframes scan {
+  0%   { top: 0%;   opacity: 0.8; }
+  85%  { opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* ── Bounding Box Appear ── */
+@keyframes bbox-appear {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Danger bbox pulse ── */
+@keyframes danger-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  50%       { box-shadow: 0 0 0 4px rgba(239,68,68,0.15); }
+}
+
+/* ── SOS ripple ── */
+@keyframes sos-ripple {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* ── Toast enter/exit ── */
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateY(-16px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-exit {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+
+/* ── Voice overlay expand ── */
+@keyframes voice-expand {
+  0%   { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+}
+
+/* ── Mic pulse ── */
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(163,230,53,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(163,230,53,0); }
+}
+
+/* ── Emergency HUD rise ── */
+@keyframes hud-rise {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SOS arrow march ── */
+@keyframes arrow-march {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.8; }
+}
+
+/* ── Badge pulse ── */
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Warning appear ── */
+@keyframes warning-appear {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Compass ring draw ── */
+@keyframes compass-appear {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ── Freq bar dance ── */
+@keyframes bar-dance {
+  0%   { transform: scaleY(0.3); }
+  50%  { transform: scaleY(1); }
+  100% { transform: scaleY(0.3); }
+}
+
+/* ── Haptic feedback flash ── */
+@keyframes haptic-flash {
+  0%   { background: rgba(163,230,53,0.3); }
+  100% { background: transparent; }
+}
+
+/* ── Smooth screen transitions ── */
+.app-screen {
+  transition: opacity 300ms cubic-bezier(0.4,0,0.2,1), transform 300ms cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Gesture feedback ripple ── */
+.gesture-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(163,230,53,0.15);
+  border: 1px solid rgba(163,230,53,0.3);
+  pointer-events: none;
+  animation: gesture-ripple-out 0.6s ease-out both;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes gesture-ripple-out {
+  from { width: 0; height: 0; opacity: 1; }
+  to   { width: 80px; height: 80px; opacity: 0; }
+}
+
+/* ── Loading skeleton pulse ── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+
+/* ── Entrance animations for cards ── */
+.db-meter-card,
+.spectrum-card,
+.noise-sources-card,
+.ear-health-card,
+.haptic-compass-card,
+.directions-card,
+.saved-routes-card,
+.gps-broadcast-card,
+.contacts-card,
+.companion-card,
+.sos-card {
+  animation: card-appear 0.4s var(--ease-spring) both;
+}
+
+.db-meter-card   { animation-delay: 0.05s; }
+.spectrum-card   { animation-delay: 0.10s; }
+.noise-sources-card { animation-delay: 0.15s; }
+.ear-health-card { animation-delay: 0.20s; }
+.haptic-compass-card { animation-delay: 0.05s; }
+.directions-card { animation-delay: 0.10s; }
+.saved-routes-card { animation-delay: 0.15s; }
+.sos-card        { animation-delay: 0.05s; }
+.gps-broadcast-card { animation-delay: 0.10s; }
+.contacts-card   { animation-delay: 0.15s; }
+.companion-card  { animation-delay: 0.20s; }
+
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Noise source fill pulse ── */
+.noise-source__fill {
+  animation: fill-pulse 3s ease-in-out infinite;
+}
+
+@keyframes fill-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%       { filter: brightness(1.2); }
+}
+
+/* ── 3D Spatial audio indicator ── */
+@keyframes spatial-pan {
+  0%   { --level: 70%; }
+  25%  { --level: 20%; }
+  50%  { --level: 85%; }
+  75%  { --level: 40%; }
+  100% { --level: 70%; }
+}
+
+/* ── Compass needle swing ── */
+.compass-needle-wrap {
+  animation: compass-wobble 8s ease-in-out infinite;
+}
+
+@keyframes compass-wobble {
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(5deg); }
+  40%  { transform: rotate(-3deg); }
+  60%  { transform: rotate(8deg); }
+  80%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ── Screen reader announcement animation ── */
+@keyframes announce-flash {
+  0%   { outline-color: rgba(163,230,53,0.8); }
+  100% { outline-color: transparent; }
+}
+
+/* ── Preference: reduce motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

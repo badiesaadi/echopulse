@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a3e635" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#a3e635" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#a3e635" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="sweepGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#a3e635" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Background -->
+  <rect width="512" height="512" rx="112" fill="#050505"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- Radar Glow -->
+  <circle cx="256" cy="256" r="210" fill="url(#radarGlow)"/>
+
+  <!-- Concentric Radar Rings -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#1c2514" stroke-width="2"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="rgba(163, 230, 53, 0.18)" stroke-width="2"/>
+  <circle cx="256" cy="256" r="90" fill="none" stroke="rgba(163, 230, 53, 0.3)" stroke-width="2"/>
+  <circle cx="256" cy="256" r="40" fill="none" stroke="rgba(163, 230, 53, 0.5)" stroke-width="2"/>
+
+  <!-- Radar Sector Sweep -->
+  <path d="M 256 256 L 390 122 A 190 190 0 0 0 256 66 Z" fill="url(#sweepGrad)"/>
+
+  <!-- Outer Ring Accent -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#ringGrad)" stroke-width="3.5" stroke-dasharray="16 8"/>
+
+  <!-- Spatial Eye Silhouette -->
+  <path d="M 66 256 C 120 156, 392 156, 446 256 C 392 356, 120 356, 66 256 Z" fill="none" stroke="#a3e635" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Spatial Core Iris -->
+  <circle cx="256" cy="256" r="54" fill="#0d140a" stroke="#a3e635" stroke-width="3"/>
+  <circle cx="256" cy="256" r="26" fill="#a3e635"/>
+  <circle cx="264" cy="248" r="7" fill="#ffffff"/>
+
+  <!-- Reticle Crosshair Ticks -->
+  <line x1="256" y1="46" x2="256" y2="76" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="256" y1="436" x2="256" y2="466" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="46" y1="256" x2="76" y2="256" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="436" y1="256" x2="466" y2="256" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Diagonal Sub-nodes -->
+  <circle cx="150" cy="150" r="5" fill="#06b6d4"/>
+  <circle cx="362" cy="150" r="5" fill="#fbbf24"/>
+  <circle cx="150" cy="362" r="5" fill="#a3e635"/>
+  <circle cx="362" cy="362" r="5" fill="#06b6d4"/>
+</svg>

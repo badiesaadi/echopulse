@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════════════════
+   EchoPulse — Onboarding Carousel Styles
+   Full-screen 3-step swipeable introduction
+═══════════════════════════════════════════════════════ */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  animation: ob-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.onboarding-track-outer {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.onboarding-slides {
+  display: flex;
+  width: 300%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.onboarding-card {
+  width: calc(100% / 3);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 36px;
+  gap: 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.onboarding-card__emoji {
+  font-size: 76px;
+  line-height: 1;
+  margin-bottom: 8px;
+  animation: ob-float 4s ease-in-out infinite;
+}
+
+.onboarding-card__title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.onboarding-card__title span {
+  color: #a3e635;
+}
+
+.onboarding-card__subtitle {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+  max-width: 300px;
+}
+
+.onboarding-card__feature-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 290px;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.onboarding-card__feature-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.onboarding-card__feature-list li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a3e635;
+  box-shadow: 0 0 8px rgba(163, 230, 53, 0.5);
+  flex-shrink: 0;
+}
+
+.onboarding-card--1 { border-top: 2px solid #a3e635; }
+.onboarding-card--2 { border-top: 2px solid #06b6d4; }
+.onboarding-card--3 { border-top: 2px solid #fbbf24; }
+
+.onboarding-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 32px;
+  padding-bottom: max(28px, env(safe-area-inset-bottom));
+  flex-shrink: 0;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8));
+}
+
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.onboarding-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.onboarding-dot.active {
+  width: 26px;
+  border-radius: 4px;
+  background: #a3e635;
+  box-shadow: 0 0 10px rgba(163, 230, 53, 0.4);
+}
+
+.onboarding-btn-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 330px;
+}
+
+.onboarding-btn-primary {
+  flex: 1;
+  padding: 16px 24px;
+  background: #a3e635;
+  color: #000000;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 24px rgba(163, 230, 53, 0.25);
+  font-family: inherit;
+}
+
+.onboarding-btn-primary:active {
+  transform: scale(0.96);
+}
+
+.onboarding-btn-skip {
+  padding: 16px 22px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.onboarding-btn-skip:active {
+  transform: scale(0.96);
+}
+
+@keyframes ob-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes ob-enter {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ob-exit {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.97); }
+}
+
+.onboarding-overlay.exiting {
+  animation: ob-exit 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-slides,
+  .onboarding-card__emoji,
+  .onboarding-overlay {
+    transition: none !important;
+    animation: none !important;
+  }
+}
